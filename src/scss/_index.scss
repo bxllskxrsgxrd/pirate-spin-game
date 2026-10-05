@@ -149,12 +149,48 @@ button {
 
 	display: grid;
 	grid-template-columns: repeat(6, minmax(0, 1fr));
-	grid-template-rows: repeat(5, minmax(0, 1fr));
+	grid-template-rows: minmax(0, 1fr);
 	gap: 0;
 
 	background: #071d2c;
 
 	overflow: hidden;
+}
+
+.slot-reel {
+	min-width: 0;
+	min-height: 0;
+
+	position: relative;
+
+	overflow: hidden;
+}
+
+.slot-reel__symbols {
+	height: 100%;
+
+	display: grid;
+	grid-template-rows: repeat(5, minmax(0, 1fr));
+}
+
+.slot-reel__strip {
+	position: absolute;
+	top: 0;
+	right: 0;
+	left: 0;
+
+	height: 500%;
+
+	display: grid;
+	grid-template-rows: repeat(25, minmax(0, 1fr));
+
+	will-change: transform;
+}
+
+.slot-grid.is-spinning {
+	.slot-reel__strip {
+		animation: reel-spin var(--reel-duration) var(--reel-delay) forwards;
+	}
 }
 
 .slot-cell {
@@ -454,6 +490,183 @@ button {
 	}
 }
 
+.control-button--spin.is-spinning {
+	.spin-button__arrow {
+		animation: spin-arrow 900ms ease-in-out;
+	}
+}
+
+.control-button--auto.is-active {
+	filter: brightness(1.18) drop-shadow(0 0 8px rgb(255 217 84 / 72%));
+}
+
+.offer-overlay {
+	position: fixed;
+	z-index: 100;
+	inset: 0;
+
+	padding: 16px;
+
+	display: grid;
+	place-items: center;
+
+	background: rgb(0 8 8 / 76%);
+	backdrop-filter: blur(2px);
+}
+
+.offer-modal {
+	width: min(92vw, 430px);
+	height: min(52svh, 410px);
+	min-height: 340px;
+	max-height: calc(100svh - 24px);
+
+	position: relative;
+
+	display: grid;
+	place-items: center;
+
+	background: transparent;
+}
+
+.offer-modal::before {
+	content: '';
+
+	position: absolute;
+	z-index: 0;
+	inset: 7% 4% 12%;
+
+	background: radial-gradient(circle at 50% 42%, #1d3445 0%, #091926 66%, #031019 100%);
+	border-radius: 18px;
+}
+
+.offer-modal__frame {
+	position: absolute;
+	z-index: 1;
+	inset: 0;
+
+	width: 100%;
+	height: 100%;
+	max-width: none;
+
+	pointer-events: none;
+}
+
+.offer-modal__content {
+	width: 78%;
+	height: 82%;
+
+	position: relative;
+	z-index: 2;
+
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: clamp(4px, 0.8svh, 8px);
+
+	text-align: center;
+}
+
+.offer-modal h2 {
+	color: #ffe06c;
+	font-size: clamp(28px, 8vw, 42px);
+	line-height: 1;
+	text-shadow:
+		0 2px 0 #7b3500,
+		0 0 8px rgb(255 196 43 / 48%);
+}
+
+.offer-modal__chest {
+	width: min(68%, 245px);
+	height: clamp(105px, 16svh, 150px);
+
+	margin-block: -8px -14px;
+
+	object-fit: contain;
+	filter: drop-shadow(0 7px 8px rgb(0 0 0 / 58%));
+}
+
+.offer-modal__reward {
+	width: 100%;
+
+	padding: 7px 10px;
+
+	color: #fff4cf;
+	font-size: clamp(14px, 4vw, 20px);
+	font-weight: 700;
+	line-height: 1.1;
+
+	background: rgb(5 20 30 / 78%);
+	border: 1px solid #bc7a10;
+	border-radius: 12px;
+	box-shadow: inset 0 0 0 2px rgb(255 207 68 / 16%);
+}
+
+.offer-modal__reward strong {
+	color: #ffc62f;
+	font-size: 1.35em;
+	white-space: nowrap;
+}
+
+.offer-modal__hint {
+	color: #e1e1d7;
+	font-family: Arial, sans-serif;
+	font-size: clamp(11px, 3vw, 14px);
+	line-height: 1.2;
+}
+
+.offer-modal__button {
+	width: 78%;
+	min-height: 48px;
+
+	padding: 8px 18px;
+
+	color: #5c2900;
+	font-size: clamp(20px, 5vw, 27px);
+	font-weight: 800;
+	line-height: 1;
+
+	background: linear-gradient(180deg, #fff17b 0%, #ffc637 48%, #db8509 100%);
+	border: 2px solid #784000;
+	border-radius: 999px;
+	box-shadow:
+		inset 0 0 0 2px rgb(255 255 255 / 42%),
+		0 3px 0 #5c2c00,
+		0 5px 8px rgb(0 0 0 / 42%);
+}
+
+.offer-modal__button:focus-visible {
+	outline: 3px solid #fff5a2;
+	outline-offset: 3px;
+}
+
+@keyframes reel-spin {
+	0% {
+		transform: translateY(0);
+		animation-timing-function: cubic-bezier(0.55, 0.06, 0.68, 0.19);
+	}
+
+	22% {
+		transform: translateY(-16%);
+		animation-timing-function: linear;
+	}
+
+	76% {
+		transform: translateY(-68%);
+		animation-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
+	}
+
+	100% {
+		transform: translateY(-80%);
+	}
+}
+
+@keyframes spin-arrow {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
 @media (max-height: 680px) {
 	.game-stage {
 		--stage-padding-top: 4px;
@@ -483,6 +696,24 @@ button {
 				}
 			}
 		}
+	}
+
+	.offer-modal {
+		height: calc(100svh - 20px);
+		min-height: 0;
+	}
+
+	.offer-modal__content {
+		height: 84%;
+		gap: 3px;
+	}
+
+	.offer-modal__chest {
+		height: 94px;
+	}
+
+	.offer-modal__button {
+		min-height: 42px;
 	}
 }
 
