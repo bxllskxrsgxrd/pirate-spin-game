@@ -101,6 +101,35 @@ button {
 		filter: drop-shadow(0 3px 2px rgb(0 0 0 / 60%));
 	}
 
+	&__fill-track {
+		position: absolute;
+		z-index: 1;
+		top: 50%;
+		left: 18px;
+
+		width: calc(min(61vw, 244px) - 31px);
+		height: 8px;
+
+		border-radius: 999px;
+
+		transform: translateY(-50%);
+
+		overflow: hidden;
+		pointer-events: none;
+	}
+
+	&__fill {
+		display: block;
+
+		height: 100%;
+
+		background: linear-gradient(90deg, #f0a910 0%, #ffe77a 52%, #63e4d2 100%);
+		border-radius: inherit;
+		box-shadow: 0 0 7px rgb(255 211 62 / 72%);
+
+		transition: width 600ms ease;
+	}
+
 	&__chest {
 		position: relative;
 		z-index: 2;
@@ -112,6 +141,10 @@ button {
 		margin-left: calc(var(--chest-size) / -2);
 
 		filter: drop-shadow(0 3px 3px rgb(0 0 0 / 55%));
+
+		&.is-open {
+			animation: chest-glow 1.2s ease-in-out infinite alternate;
+		}
 	}
 }
 
@@ -405,10 +438,29 @@ button {
 			0 3px 5px rgb(0 0 0 / 70%),
 			inset 0 0 4px #ffdd67;
 
+		transition:
+			filter 350ms ease,
+			box-shadow 350ms ease,
+			border-color 350ms ease;
+
 		img {
 			width: 84%;
 
 			filter: drop-shadow(0 2px 1px #000);
+			transition: filter 350ms ease;
+		}
+
+		&.is-complete {
+			border-color: #fff19a;
+
+			box-shadow:
+				0 0 12px rgb(255 211 49 / 85%),
+				0 3px 5px rgb(0 0 0 / 70%),
+				inset 0 0 8px #ffe879;
+
+			img {
+				filter: drop-shadow(0 0 5px #ffdf55) brightness(1.25);
+			}
 		}
 	}
 }
@@ -464,6 +516,13 @@ button {
 	font-weight: 800;
 	text-transform: uppercase;
 	text-shadow: 0 2px 1px #542e04;
+}
+
+.control-button--menu {
+	&:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
 }
 
 .menu-icon {
@@ -642,22 +701,32 @@ button {
 
 @keyframes reel-spin {
 	0% {
-		transform: translateY(0);
+		transform: translateY(-80%);
 		animation-timing-function: cubic-bezier(0.55, 0.06, 0.68, 0.19);
 	}
 
 	22% {
-		transform: translateY(-16%);
+		transform: translateY(-64%);
 		animation-timing-function: linear;
 	}
 
 	76% {
-		transform: translateY(-68%);
+		transform: translateY(-12%);
 		animation-timing-function: cubic-bezier(0.22, 0.61, 0.36, 1);
 	}
 
 	100% {
-		transform: translateY(-80%);
+		transform: translateY(0);
+	}
+}
+
+@keyframes chest-glow {
+	from {
+		filter: drop-shadow(0 3px 3px rgb(0 0 0 / 55%)) drop-shadow(0 0 3px rgb(255 201 45 / 45%));
+	}
+
+	to {
+		filter: drop-shadow(0 3px 3px rgb(0 0 0 / 55%)) drop-shadow(0 0 12px rgb(255 226 102 / 95%));
 	}
 }
 

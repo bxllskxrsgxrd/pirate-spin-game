@@ -108,8 +108,6 @@ const symbolLabels: Record<SymbolName, string> = {
 	'super-bonus': 'Super bonus',
 };
 
-const isChestOpen = false;
-
 function getSymbolImage(name: SymbolName) {
 	return symbolAssets[`./assets/symbols/${name}.png`];
 }
@@ -127,7 +125,7 @@ function createReelStrips(current: readonly SlotSymbol[], target: readonly SlotS
 			name: fillerSymbols[(fillerIndex + columnIndex * 2 + roundIndex) % fillerSymbols.length],
 		}));
 
-		return [...currentColumn, ...filler, ...targetColumn];
+		return [...targetColumn, ...filler, ...currentColumn];
 	});
 }
 
@@ -170,6 +168,7 @@ function App() {
 	const [reelStrips, setReelStrips] = useState<SlotSymbol[][] | null>(null);
 	const [phase, setPhase] = useState<GamePhase>('idle');
 	const [autoEnabled, setAutoEnabled] = useState(false);
+	const [completedRounds, setCompletedRounds] = useState(0);
 
 	const symbolsRef = useRef<SlotSymbol[]>(initialSymbols);
 	const phaseRef = useRef<GamePhase>('idle');
@@ -177,16 +176,16 @@ function App() {
 	const autoEnabledRef = useRef(false);
 	const winPlayedRef = useRef(false);
 	const timersRef = useRef<number[]>([]);
-	const spinAudioRef = useRef<HTMLAudioElement | null>(null);
+	const spinAudioRefs = useRef<HTMLAudioElement[]>([]);
 	const winAudioRef = useRef<HTMLAudioElement | null>(null);
 
 	useEffect(() => {
-		spinAudioRef.current = new Audio(spinSound);
+		spinAudioRefs.current = Array.from({ length: COLUMN_COUNT }, () => new Audio(spinSound));
 		winAudioRef.current = new Audio(winSound);
 
 		return () => {
 			timersRef.current.forEach((timer) => window.clearTimeout(timer));
-			spinAudioRef.current?.pause();
+			spinAudioRefs.current.forEach((audio) => audio.pause());
 			winAudioRef.current?.pause();
 		};
 	}, []);
@@ -219,16 +218,24 @@ function App() {
 		const target = roundResults[roundIndex];
 		setReelStrips(createReelStrips(symbolsRef.current, target, roundIndex));
 		updatePhase('spinning');
-		playAudio(spinAudioRef.current);
+		spinAudioRefs.current.forEach((audio, columnIndex) => {
+			if (columnIndex === 0) {
+				playAudio(audio);
+				return;
+			}
+
+			schedule(() => playAudio(audio), columnIndex * REEL_START_DELAY);
+		});
 
 		schedule(() => {
-			const completedRounds = roundIndex + 1;
+			const roundsFinished = roundIndex + 1;
 			const completedMatrix = [...target];
 
 			symbolsRef.current = completedMatrix;
-			nextRoundRef.current = completedRounds as RoundIndex | 2;
+			nextRoundRef.current = roundsFinished as RoundIndex | 2;
 			setSymbols(completedMatrix);
 			setReelStrips(null);
+			setCompletedRounds(roundsFinished);
 
 			if (roundIndex === 0) {
 				updatePhase('bonus-complete');
@@ -272,15 +279,20 @@ function App() {
 
 	const isSpinning = phase === 'spinning';
 	const controlsLocked = phase === 'super-bonus-complete' || phase === 'offer';
+	const progressValue = completedRounds === 0 ? 0 : completedRounds === 1 ? 25 : 100;
+	const isChestOpen = completedRounds === 2;
 
 	return (
 		<main className="game-screen" data-game-state={phase} style={{ '--game-background': `url(${backgroundImage})` } as CSSProperties}>
 			<div className="game-stage">
 				<header className="progress-panel" aria-label="Treasure progress">
 					<img className="progress-panel__compass" src={compassImage} alt="" />
-					<div className="progress-panel__meter">
-						<img className="progress-panel__bar" src={progressBarImage} alt="Progress" />
-						<img className="progress-panel__chest" src={isChestOpen ? chestOpenImage : chestClosedImage} alt={isChestOpen ? 'Open treasure chest' : 'Closed treasure chest'} />
+					<div className="progress-panel__meter" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progressValue}>
+						<img className="progress-panel__bar" src={progressBarImage} alt="" />
+						<span className="progress-panel__fill-track" aria-hidden="true">
+							<span className="progress-panel__fill" style={{ width: `${progressValue}%` }} />
+						</span>
+						<img className={`progress-panel__chest${isChestOpen ? ' is-open' : ''}`} src={isChestOpen ? chestOpenImage : chestClosedImage} alt={isChestOpen ? 'Open treasure chest' : 'Closed treasure chest'} />
 					</div>
 				</header>
 
@@ -308,7 +320,7 @@ function App() {
 
 					<div className="scarab-track" aria-label="Bonus scarabs">
 						{[0, 1, 2].map((position) => (
-							<div className="scarab-track__slot" key={position}>
+							<div className={`scarab-track__slot${position < completedRounds ? ' is-complete' : ''}`} key={position}>
 								<img src={scarabImage} alt={`Scarab ${position + 1}`} />
 							</div>
 						))}
@@ -316,7 +328,7 @@ function App() {
 				</div>
 
 				<nav className="game-controls" aria-label="Game controls">
-					<GradientButton className="control-button control-button--menu" aria-label="Open menu">
+					<GradientButton className="control-button control-button--menu" aria-label="Open menu" disabled={isSpinning || controlsLocked}>
 						<span className="menu-icon" aria-hidden="true"><img src={burger} alt="" /></span>
 					</GradientButton>
 
