@@ -129,6 +129,11 @@ function createReelStrips(current: readonly SlotSymbol[], target: readonly SlotS
 	});
 }
 
+const preparedRoundReels = [
+	createReelStrips(initialSymbols, roundResults[0], 0),
+	createReelStrips(roundResults[0], roundResults[1], 1),
+] as const;
+
 function Slot({ symbol }: { symbol: SlotSymbol }) {
 	const image = getSymbolImage(symbol.name);
 
@@ -152,11 +157,11 @@ function OfferModal({ onContinue }: { onContinue: () => void }) {
 			<section className="offer-modal" role="dialog" aria-modal="true" aria-labelledby="offer-title">
 				<img className="offer-modal__frame" src={frameModalImage} alt="" />
 				<div className="offer-modal__content">
-					<h2 id="offer-title">Поздравляем!</h2>
+					<h2 id="offer-title">Congratulations!</h2>
 					<img className="offer-modal__chest" src={chestModalImage} alt="Сундук с бонусами" />
-					<p className="offer-modal__reward">Вы получили <strong>25 бонусов</strong></p>
-					<p className="offer-modal__hint">Нажмите кнопку ниже, чтобы перейти</p>
-					<button className="offer-modal__button" type="button" onClick={onContinue}>Перейти</button>
+					<p className="offer-modal__reward">You've won <strong>25 bonuses</strong></p>
+					<p className="offer-modal__hint">Click the button below to continue</p>
+					<button className="offer-modal__button" type="button" onClick={onContinue}>Claim</button>
 				</div>
 			</section>
 		</div>
@@ -170,7 +175,6 @@ function App() {
 	const [autoEnabled, setAutoEnabled] = useState(false);
 	const [completedRounds, setCompletedRounds] = useState(0);
 
-	const symbolsRef = useRef<SlotSymbol[]>(initialSymbols);
 	const phaseRef = useRef<GamePhase>('idle');
 	const nextRoundRef = useRef<RoundIndex | 2>(0);
 	const autoEnabledRef = useRef(false);
@@ -216,7 +220,7 @@ function App() {
 		if (phaseRef.current === 'spinning' || phaseRef.current === 'offer' || nextRoundRef.current > roundIndex) return;
 
 		const target = roundResults[roundIndex];
-		setReelStrips(createReelStrips(symbolsRef.current, target, roundIndex));
+		setReelStrips(preparedRoundReels[roundIndex]);
 		updatePhase('spinning');
 		spinAudioRefs.current.forEach((audio, columnIndex) => {
 			if (columnIndex === 0) {
@@ -231,7 +235,6 @@ function App() {
 			const roundsFinished = roundIndex + 1;
 			const completedMatrix = [...target];
 
-			symbolsRef.current = completedMatrix;
 			nextRoundRef.current = roundsFinished as RoundIndex | 2;
 			setSymbols(completedMatrix);
 			setReelStrips(null);
@@ -288,9 +291,11 @@ function App() {
 				<header className="progress-panel" aria-label="Treasure progress">
 					<img className="progress-panel__compass" src={compassImage} alt="" />
 					<div className="progress-panel__meter" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progressValue}>
-						<img className="progress-panel__bar" src={progressBarImage} alt="" />
-						<span className="progress-panel__fill-track" aria-hidden="true">
-							<span className="progress-panel__fill" style={{ width: `${progressValue}%` }} />
+						<span className="progress-panel__bar-shell">
+							<img className="progress-panel__bar" src={progressBarImage} alt="" />
+							<span className="progress-panel__fill-track" aria-hidden="true">
+								<span className="progress-panel__fill" style={{ width: `${progressValue}%` }} />
+							</span>
 						</span>
 						<img className={`progress-panel__chest${isChestOpen ? ' is-open' : ''}`} src={isChestOpen ? chestOpenImage : chestClosedImage} alt={isChestOpen ? 'Open treasure chest' : 'Closed treasure chest'} />
 					</div>

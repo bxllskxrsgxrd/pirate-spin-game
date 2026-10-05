@@ -92,11 +92,18 @@ button {
 		position: relative;
 	}
 
-	&__bar {
+	&__bar-shell {
 		width: min(61vw, 244px);
-		max-width: none;
-
 		flex-shrink: 1;
+
+		position: relative;
+
+		display: block;
+	}
+
+	&__bar {
+		width: 100%;
+		max-width: none;
 
 		filter: drop-shadow(0 3px 2px rgb(0 0 0 / 60%));
 	}
@@ -104,15 +111,12 @@ button {
 	&__fill-track {
 		position: absolute;
 		z-index: 1;
-		top: 50%;
-		left: 18px;
+		top: 7px;
+		right: 11px;
+		bottom: 7px;
+		left: 20px;
 
-		width: calc(min(61vw, 244px) - 31px);
-		height: 8px;
-
-		border-radius: 999px;
-
-		transform: translateY(-50%);
+		border-radius: 6px;
 
 		overflow: hidden;
 		pointer-events: none;
@@ -124,8 +128,7 @@ button {
 		height: 100%;
 
 		background: linear-gradient(90deg, #f0a910 0%, #ffe77a 52%, #63e4d2 100%);
-		border-radius: inherit;
-		box-shadow: 0 0 7px rgb(255 211 62 / 72%);
+		border-radius: 5px 1px 1px 5px;
 
 		transition: width 600ms ease;
 	}
@@ -217,12 +220,14 @@ button {
 	display: grid;
 	grid-template-rows: repeat(25, minmax(0, 1fr));
 
+	transform: translateY(-80%);
+
 	will-change: transform;
 }
 
 .slot-grid.is-spinning {
 	.slot-reel__strip {
-		animation: reel-spin var(--reel-duration) var(--reel-delay) forwards;
+		animation: reel-spin var(--reel-duration) var(--reel-delay) both;
 	}
 }
 
