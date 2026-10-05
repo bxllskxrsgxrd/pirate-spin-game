@@ -1,5 +1,11 @@
 @use 'sass:color';
 
+html,
+body,
+#root {
+	background: #000;
+}
+
 :root {
 	font-family:
 		system-ui,
