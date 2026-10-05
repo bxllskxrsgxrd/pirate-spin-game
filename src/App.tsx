@@ -6,6 +6,10 @@ import frameImage from './assets/images/frame.png';
 import progressBarImage from './assets/images/progress-bar.png';
 import scarabImage from './assets/images/scarab.png';
 
+import burger from './assets/svg/burger.svg';
+import spinArrow from './assets/svg/spin-arrow.svg';
+import { GradientButton } from './components/GradientButton/GradientButton';
+
 type SymbolName =
 	| 'bird-blue'
 	| 'bird-green'
@@ -134,24 +138,21 @@ function App() {
 				</div>
 
 				<nav className="game-controls" aria-label="Game controls">
-					<button className="control-button control-button--menu" type="button" aria-label="Open menu">
+					<GradientButton className="control-button control-button--menu" aria-label="Open menu">
 						<span className="menu-icon" aria-hidden="true">
-							<i />
-							<i />
-							<i />
+							<img src={burger} alt="Burger Menu" />
 						</span>
-						<span>Menu</span>
-					</button>
+					</GradientButton>
 
-					<button className="spin-button" type="button" aria-label="Spin">
-						<span className="spin-button__arrow" aria-hidden="true">↻</span>
-						<span className="spin-button__label">Spin</span>
-					</button>
+					<GradientButton className="control-button control-button--spin" aria-label="Spin">
+						<span className="spin-button__arrow" aria-hidden="true">
+							<img src={spinArrow} alt="Spin Arrow" />
+						</span>
+					</GradientButton>
 
-					<button className="control-button control-button--auto" type="button" aria-label="Auto spin">
-						<span className="auto-icon" aria-hidden="true">↻</span>
+					<GradientButton className="control-button control-button--auto" aria-label="Auto spin">
 						<span>Auto</span>
-					</button>
+					</GradientButton>
 				</nav>
 			</div>
 		</main>

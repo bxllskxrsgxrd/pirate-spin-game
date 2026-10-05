@@ -1,0 +1,66 @@
+.gradient-button {
+	--button-size: 48px;
+
+	width: var(--button-size);
+	height: var(--button-size);
+	flex: 0 0 var(--button-size);
+
+	padding: 0;
+
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+
+	border: 3px solid transparent;
+	border-radius: 50%;
+
+	background:
+		radial-gradient(circle at 50% 35%, #395d62 0 28%, #183438 55%, #071b1e 72%) padding-box,
+		linear-gradient(135deg, #fff099 0%, #daa82f 25%, #fbd876 55%, #9d640e 100%) border-box;
+
+	box-sizing: border-box;
+
+	color: #fff099;
+	cursor: pointer;
+
+	appearance: none;
+	outline: none;
+
+	transition:
+		transform 0.15s ease,
+		filter 0.15s ease;
+
+	&__content {
+		width: 100%;
+		height: 100%;
+
+		display: flex;
+		align-items: center;
+		justify-content: center;
+
+		border-radius: inherit;
+		overflow: hidden;
+	}
+
+	&:hover:not(:disabled) {
+		filter: brightness(1.08);
+	}
+
+	&:active:not(:disabled) {
+		transform: scale(0.96);
+	}
+
+	&:focus-visible {
+		outline: 2px solid rgba(255, 240, 153, 0.7);
+		outline-offset: 3px;
+	}
+
+	&:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
+	@media (min-width: 768px) {
+		--button-size: 64px;
+	}
+}
