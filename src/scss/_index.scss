@@ -60,16 +60,17 @@ button {
 }
 
 .progress-panel {
-	grid-area: stage;
-	align-self: start;
+	--chest-size: clamp(70px, 20.5vw, 80px);
 
-	width: min(100%, 390px);
+	grid-area: stage;
+
+	align-self: start;
+	justify-self: center;
+
 	height: clamp(58px, 8.2svh, 72px);
 
-	padding-inline: 2px clamp(35px, 10.25vw, 40px);
-
 	display: grid;
-	grid-template-columns: clamp(52px, 16vw, 64px) minmax(0, 1fr);
+	grid-template-columns: clamp(52px, 16vw, 64px) auto;
 	align-items: center;
 
 	position: relative;
@@ -81,38 +82,34 @@ button {
 
 		width: 100%;
 
-		justify-self: start;
-
 		filter: drop-shadow(0 3px 3px rgb(0 0 0 / 55%));
 	}
 
 	&__meter {
-		width: min(100%, 244px);
+		display: flex;
+		align-items: center;
 
 		position: relative;
-
-		display: grid;
-		align-items: center;
 	}
 
 	&__bar {
-		width: 100%;
+		width: min(61vw, 244px);
 		max-width: none;
+
+		flex-shrink: 1;
 
 		filter: drop-shadow(0 3px 2px rgb(0 0 0 / 60%));
 	}
 
 	&__chest {
-		position: absolute;
+		position: relative;
 		z-index: 2;
 
-		top: 50%;
-		left: 100%;
-
-		width: clamp(70px, 20.5vw, 80px);
+		width: var(--chest-size);
 		max-width: none;
+		flex: 0 0 var(--chest-size);
 
-		transform: translate(-50%, -50%);
+		margin-left: calc(var(--chest-size) / -2);
 
 		filter: drop-shadow(0 3px 3px rgb(0 0 0 / 55%));
 	}
@@ -413,7 +410,7 @@ button {
 		.gradient-button {
 			&.control-button {
 				&--spin {
-					--button-size: 96px;
+					--button-size: 84px;
 				}
 			}
 		}
