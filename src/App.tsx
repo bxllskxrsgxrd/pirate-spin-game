@@ -120,21 +120,23 @@ function App() {
 					</div>
 				</header>
 
-				<section className="board-shell" aria-label="Game board, 6 columns by 5 rows">
-					<div className="slot-grid">
-						{initialSymbols.map((symbol) => (
-							<Slot key={symbol.id} symbol={symbol} />
+				<div className="game-content">
+					<section className="board-shell" aria-label="Game board, 6 columns by 5 rows">
+						<div className="slot-grid">
+							{initialSymbols.map((symbol) => (
+								<Slot key={symbol.id} symbol={symbol} />
+							))}
+						</div>
+						<img className="board-frame" src={frameImage} alt="" />
+					</section>
+
+					<div className="scarab-track" aria-label="Bonus scarabs">
+						{[0, 1, 2].map((position) => (
+							<div className="scarab-track__slot" key={position}>
+								<img src={scarabImage} alt={`Scarab ${position + 1}`} />
+							</div>
 						))}
 					</div>
-					<img className="board-frame" src={frameImage} alt="" />
-				</section>
-
-				<div className="scarab-track" aria-label="Bonus scarabs">
-					{[0, 1, 2].map((position) => (
-						<div className="scarab-track__slot" key={position}>
-							<img src={scarabImage} alt={`Scarab ${position + 1}`} />
-						</div>
-					))}
 				</div>
 
 				<nav className="game-controls" aria-label="Game controls">

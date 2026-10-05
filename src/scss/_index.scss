@@ -42,21 +42,27 @@ button {
 }
 
 .game-stage {
+	--stage-padding-top: clamp(8px, 2.2svh, 18px);
+	--stage-padding-bottom: clamp(10px, 2svh, 18px);
+
 	width: min(100%, 440px);
 	min-height: 100vh;
 	min-height: 100svh;
 
 	margin: 0 auto;
-	padding: clamp(8px, 2.2svh, 18px) 6px clamp(10px, 2svh, 18px);
+	padding: var(--stage-padding-top) 6px var(--stage-padding-bottom);
 
-	display: flex;
-	flex-direction: column;
-	align-items: center;
+	display: grid;
+	grid-template: 'stage' minmax(0, 1fr) / minmax(0, 1fr);
+	place-items: center;
 
 	position: relative;
 }
 
 .progress-panel {
+	grid-area: stage;
+	align-self: start;
+
 	width: min(100%, 390px);
 	height: clamp(58px, 8.2svh, 72px);
 
@@ -110,6 +116,19 @@ button {
 
 		filter: drop-shadow(0 3px 3px rgb(0 0 0 / 55%));
 	}
+}
+
+.game-content {
+	width: 100%;
+
+	grid-area: stage;
+	align-self: center;
+
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+
+	transform: translateY(calc((var(--stage-padding-bottom) - var(--stage-padding-top)) / 2));
 }
 
 .board-shell {
@@ -344,7 +363,7 @@ button {
 		display: grid;
 		place-items: center;
 
-		border: 2px solid #f2c647;
+		border: 1px solid #f2c647;
 		border-radius: 50%;
 
 		background: radial-gradient(circle, #24384b 0 48%, #101923 50% 66%, #a9650d 68% 74%, #3c2107 76%);
@@ -364,7 +383,7 @@ button {
 .game-controls {
 	width: min(calc(100% - 56px), 360px);
 
-	margin-top: auto;
+	margin-top: 0;
 	padding: 4px 10px;
 
 	display: grid;
@@ -374,6 +393,8 @@ button {
 
 	position: relative;
 	z-index: 4;
+	grid-area: stage;
+	align-self: end;
 
 	background: rgb(6 29 22 / 70%);
 
@@ -438,7 +459,7 @@ button {
 
 @media (max-height: 680px) {
 	.game-stage {
-		padding-top: 4px;
+		--stage-padding-top: 4px;
 	}
 
 	.progress-panel {
