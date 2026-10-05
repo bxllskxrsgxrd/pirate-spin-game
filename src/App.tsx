@@ -106,12 +106,14 @@ function App() {
 			<div className="game-stage">
 				<header className="progress-panel" aria-label="Treasure progress">
 					<img className="progress-panel__compass" src={compassImage} alt="" />
-					<img className="progress-panel__bar" src={progressBarImage} alt="Progress" />
-					<img
-						className="progress-panel__chest"
-						src={isChestOpen ? chestOpenImage : chestClosedImage}
-						alt={isChestOpen ? 'Open treasure chest' : 'Closed treasure chest'}
-					/>
+					<div className="progress-panel__meter">
+						<img className="progress-panel__bar" src={progressBarImage} alt="Progress" />
+						<img
+							className="progress-panel__chest"
+							src={isChestOpen ? chestOpenImage : chestClosedImage}
+							alt={isChestOpen ? 'Open treasure chest' : 'Closed treasure chest'}
+						/>
+					</div>
 				</header>
 
 				<section className="board-shell" aria-label="Game board, 6 columns by 5 rows">

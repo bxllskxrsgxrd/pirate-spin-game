@@ -44,40 +44,49 @@ button {
 .progress-panel {
 	width: min(100%, 390px);
 	height: clamp(58px, 8.2svh, 72px);
-	padding-inline: 2px;
+	padding-inline: 2px clamp(35px, 10.25vw, 40px);
 	display: grid;
-	grid-template-columns: clamp(52px, 16vw, 64px) minmax(0, 1fr) clamp(66px, 20.5vw, 80px);
+	grid-template-columns: clamp(52px, 16vw, 64px) minmax(0, 1fr);
 	align-items: center;
 	position: relative;
 	z-index: 4;
 }
 
-.progress-panel__compass,
-.progress-panel__chest {
+.progress-panel__compass {
 	position: relative;
 	z-index: 2;
 	width: 100%;
 	filter: drop-shadow(0 3px 3px rgb(0 0 0 / 55%));
-}
-
-.progress-panel__compass {
 	justify-self: start;
 }
 
+.progress-panel__meter {
+	width: min(100%, 244px);
+	position: relative;
+	display: grid;
+	align-items: center;
+}
+
 .progress-panel__bar {
-	width: calc(100% + 14px);
+	width: 100%;
 	max-width: none;
-	margin-inline: -7px;
 	filter: drop-shadow(0 3px 2px rgb(0 0 0 / 60%));
 }
 
 .progress-panel__chest {
-	justify-self: end;
+	position: absolute;
+	z-index: 2;
+	left: 100%;
+	top: 50%;
+	width: clamp(70px, 20.5vw, 80px);
+	max-width: none;
+	transform: translate(-50%, -50%);
+	filter: drop-shadow(0 3px 3px rgb(0 0 0 / 55%));
 }
 
 .board-shell {
 	width: min(100%, 378px);
-	aspect-ratio: 378 / 354;
+	aspect-ratio: 378 / 407;
 	position: relative;
 	filter: drop-shadow(0 6px 7px rgb(0 0 0 / 52%));
 	z-index: 2;
@@ -86,13 +95,14 @@ button {
 .slot-grid {
 	position: absolute;
 	z-index: 1;
-	left: 7.94%;
-	right: 7.94%;
-	top: 12.71%;
-	bottom: 12.43%;
+	left: 7.14%;
+	right: 7.14%;
+	top: 11.55%;
+	bottom: 8.85%;
 	display: grid;
 	grid-template-columns: repeat(6, minmax(0, 1fr));
 	grid-template-rows: repeat(5, minmax(0, 1fr));
+	gap: 0;
 	background: #071d2c;
 	overflow: hidden;
 }
@@ -396,14 +406,16 @@ button {
 
 @media (min-width: 600px) {
 	.game-screen {
-		background-size: auto 115%;
+		background: linear-gradient(180deg, rgb(21 55 55 / 92%), rgb(4 25 26 / 98%));
 	}
 
-	.game-stage::before {
-		content: '';
-		position: absolute;
-		inset: 0;
-		background: linear-gradient(90deg, rgb(0 14 15 / 34%), transparent 12% 88%, rgb(0 14 15 / 34%));
-		pointer-events: none;
+	.game-stage {
+		background-image:
+			linear-gradient(180deg, rgb(0 27 40 / 10%) 0%, rgb(0 16 13 / 4%) 54%, rgb(0 18 12 / 28%) 100%),
+			var(--game-background);
+		background-position: center;
+		background-repeat: no-repeat;
+		background-size: cover;
+		box-shadow: 0 0 28px rgb(0 14 15 / 45%);
 	}
 }
