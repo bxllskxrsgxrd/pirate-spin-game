@@ -24,6 +24,61 @@ button {
 	-webkit-tap-highlight-color: transparent;
 }
 
+.game-loader {
+	width: 100%;
+	min-height: 100vh;
+	min-height: 100svh;
+
+	display: grid;
+	place-items: center;
+
+	padding: clamp(20px, 6vw, 48px);
+
+	background: #062d2a;
+	overflow: hidden;
+
+	&__content {
+		width: min(100%, 560px);
+
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+
+	&__logo {
+		width: min(86vw, 540px);
+		height: auto;
+	}
+
+	&__progress {
+		width: min(72vw, 420px);
+		height: clamp(20px, 4.5vw, 26px);
+
+		margin-top: clamp(18px, 4svh, 34px);
+		padding: 4px;
+
+		background: #031d1b;
+		border: 2px solid #f5b617;
+		border-radius: 999px;
+		box-shadow:
+			inset 0 2px 5px rgb(0 0 0 / 65%),
+			0 2px 8px rgb(0 0 0 / 35%);
+
+		overflow: hidden;
+	}
+
+	&__fill {
+		display: block;
+		height: 100%;
+
+		background: repeating-linear-gradient(90deg, #f5b617 0 18px, #ffe77a 18px 21px, #d98a08 21px 24px);
+		border-radius: inherit;
+		box-shadow: 0 0 8px rgb(255 231 122 / 55%);
+
+		transition: width 120ms ease-out;
+	}
+}
+
 .game-screen {
 	--gold-light: #fff099;
 	--gold: #f5b617;

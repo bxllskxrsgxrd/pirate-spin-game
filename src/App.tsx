@@ -6,6 +6,7 @@ import chestClosedImage from './assets/images/chest-closed.png';
 import chestOpenImage from './assets/images/chest-open.png';
 import compassImage from './assets/images/compass.png';
 import frameImage from './assets/images/frame.png';
+import logoImage from './assets/images/logo.png';
 import progressBarImage from './assets/images/progress-bar.png';
 import scarabImage from './assets/images/scarab.png';
 import spinSound from './assets/sounds/spin.mp3';
@@ -37,13 +38,18 @@ type RoundIndex = 0 | 1;
 const COLUMN_COUNT = 6;
 const ROW_COUNT = 5;
 const REEL_FILLER_COUNT = 15;
-const REEL_START_DELAY = 220;
+const REEL_START_DELAY = 100;
 const REEL_BASE_DURATION = 1800;
-const REEL_DURATION_STEP = 350;
+const REEL_DURATION_STEP = 150;
 const ROUND_DURATION = REEL_BASE_DURATION + (COLUMN_COUNT - 1) * (REEL_START_DELAY + REEL_DURATION_STEP);
 const AUTO_ROUND_DELAY = 650;
 const CONGRATULATIONS_DELAY = 700;
 const OFFER_URL: string | null = null;
+const LOADER_DURATION = 1500;
+const LOADER_STEPS = [
+	{ delay: 220, progress: 50 },
+	{ delay: 1280, progress: 100 },
+] as const;
 
 const initialSymbolNames: SymbolName[] = [
 	'gem-red', 'bird-blue', 'gem-green', 'gem-purple', 'bird-red', 'gem-blue',
@@ -150,6 +156,8 @@ function Slot({ symbol }: { symbol: SlotSymbol }) {
 }
 
 function App() {
+	const [isLoading, setIsLoading] = useState(true);
+	const [loadingProgress, setLoadingProgress] = useState(0);
 	const [symbols, setSymbols] = useState<SlotSymbol[]>(initialSymbols);
 	const [reelStrips, setReelStrips] = useState<SlotSymbol[][] | null>(null);
 	const [phase, setPhase] = useState<GamePhase>('idle');
@@ -163,6 +171,18 @@ function App() {
 	const timersRef = useRef<number[]>([]);
 	const spinAudioRefs = useRef<HTMLAudioElement[]>([]);
 	const winAudioRef = useRef<HTMLAudioElement | null>(null);
+
+	useEffect(() => {
+		const stepTimers = LOADER_STEPS.map(({ delay, progress }) => (
+			window.setTimeout(() => setLoadingProgress(progress), delay)
+		));
+		const completionTimer = window.setTimeout(() => setIsLoading(false), LOADER_DURATION);
+
+		return () => {
+			stepTimers.forEach((timer) => window.clearTimeout(timer));
+			window.clearTimeout(completionTimer);
+		};
+	}, []);
 
 	useEffect(() => {
 		spinAudioRefs.current = Array.from({ length: COLUMN_COUNT }, () => new Audio(spinSound));
@@ -266,6 +286,26 @@ function App() {
 	const controlsLocked = phase === 'super-bonus-complete';
 	const progressValue = completedRounds === 0 ? 0 : completedRounds === 1 ? 25 : 100;
 	const isChestOpen = completedRounds === 2;
+
+	if (isLoading) {
+		return (
+			<main className="game-loader" aria-label="Загрузка игры">
+				<div className="game-loader__content">
+					<img className="game-loader__logo" src={logoImage} alt="Pirate Game" />
+					<div
+						className="game-loader__progress"
+						role="progressbar"
+						aria-label="Прогресс загрузки"
+						aria-valuemin={0}
+						aria-valuemax={100}
+						aria-valuenow={loadingProgress}
+					>
+						<span className="game-loader__fill" style={{ width: `${loadingProgress}%` }} />
+					</div>
+				</div>
+			</main>
+		);
+	}
 
 	return (
 		<main className="game-screen" data-game-state={phase} style={{ '--game-background': `url(${backgroundImage})` } as CSSProperties}>
