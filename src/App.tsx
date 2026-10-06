@@ -3,11 +3,9 @@ import type { CSSProperties } from 'react';
 
 import backgroundImage from './assets/images/background.png';
 import chestClosedImage from './assets/images/chest-closed.png';
-import chestModalImage from './assets/images/chest-modal.png';
 import chestOpenImage from './assets/images/chest-open.png';
 import compassImage from './assets/images/compass.png';
 import frameImage from './assets/images/frame.png';
-import frameModalImage from './assets/images/frame-modal.png';
 import progressBarImage from './assets/images/progress-bar.png';
 import scarabImage from './assets/images/scarab.png';
 import spinSound from './assets/sounds/spin.mp3';
@@ -33,18 +31,18 @@ type SlotSymbol = {
 	name: SymbolName;
 };
 
-type GamePhase = 'idle' | 'spinning' | 'bonus-complete' | 'super-bonus-complete' | 'offer';
+type GamePhase = 'idle' | 'spinning' | 'bonus-complete' | 'super-bonus-complete' | 'congratulations';
 type RoundIndex = 0 | 1;
 
 const COLUMN_COUNT = 6;
 const ROW_COUNT = 5;
 const REEL_FILLER_COUNT = 15;
-const REEL_START_DELAY = 100;
+const REEL_START_DELAY = 220;
 const REEL_BASE_DURATION = 1800;
-const REEL_DURATION_STEP = 180;
+const REEL_DURATION_STEP = 350;
 const ROUND_DURATION = REEL_BASE_DURATION + (COLUMN_COUNT - 1) * (REEL_START_DELAY + REEL_DURATION_STEP);
 const AUTO_ROUND_DELAY = 650;
-const OFFER_DELAY = 700;
+const CONGRATULATIONS_DELAY = 700;
 const OFFER_URL: string | null = null;
 
 const initialSymbolNames: SymbolName[] = [
@@ -151,23 +149,6 @@ function Slot({ symbol }: { symbol: SlotSymbol }) {
 	);
 }
 
-function OfferModal({ onContinue }: { onContinue: () => void }) {
-	return (
-		<div className="offer-overlay">
-			<section className="offer-modal" role="dialog" aria-modal="true" aria-labelledby="offer-title">
-				<img className="offer-modal__frame" src={frameModalImage} alt="" />
-				<div className="offer-modal__content">
-					<h2 id="offer-title">Congratulations!</h2>
-					<img className="offer-modal__chest" src={chestModalImage} alt="Сундук с бонусами" />
-					<p className="offer-modal__reward">You've won <strong>25 bonuses</strong></p>
-					<p className="offer-modal__hint">Click the button below to continue</p>
-					<button className="offer-modal__button" type="button" onClick={onContinue}>Claim</button>
-				</div>
-			</section>
-		</div>
-	);
-}
-
 function App() {
 	const [symbols, setSymbols] = useState<SlotSymbol[]>(initialSymbols);
 	const [reelStrips, setReelStrips] = useState<SlotSymbol[][] | null>(null);
@@ -217,7 +198,7 @@ function App() {
 	}
 
 	function startRound(roundIndex: RoundIndex) {
-		if (phaseRef.current === 'spinning' || phaseRef.current === 'offer' || nextRoundRef.current > roundIndex) return;
+		if (phaseRef.current === 'spinning' || phaseRef.current === 'congratulations' || nextRoundRef.current > roundIndex) return;
 
 		const target = roundResults[roundIndex];
 		setReelStrips(preparedRoundReels[roundIndex]);
@@ -258,8 +239,8 @@ function App() {
 			}
 
 			schedule(() => {
-				if (phaseRef.current === 'super-bonus-complete') updatePhase('offer');
-			}, OFFER_DELAY);
+				if (phaseRef.current === 'super-bonus-complete') updatePhase('congratulations');
+			}, CONGRATULATIONS_DELAY);
 		}, ROUND_DURATION);
 	}
 
@@ -281,73 +262,86 @@ function App() {
 	}
 
 	const isSpinning = phase === 'spinning';
-	const controlsLocked = phase === 'super-bonus-complete' || phase === 'offer';
+	const isCongratulations = phase === 'congratulations';
+	const controlsLocked = phase === 'super-bonus-complete';
 	const progressValue = completedRounds === 0 ? 0 : completedRounds === 1 ? 25 : 100;
 	const isChestOpen = completedRounds === 2;
 
 	return (
 		<main className="game-screen" data-game-state={phase} style={{ '--game-background': `url(${backgroundImage})` } as CSSProperties}>
 			<div className="game-stage">
-				<header className="progress-panel" aria-label="Treasure progress">
-					<img className="progress-panel__compass" src={compassImage} alt="" />
-					<div className="progress-panel__meter" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progressValue}>
-						<span className="progress-panel__bar-shell">
-							<img className="progress-panel__bar" src={progressBarImage} alt="" />
-							<span className="progress-panel__fill-track" aria-hidden="true">
-								<span className="progress-panel__fill" style={{ width: `${progressValue}%` }} />
+				{!isCongratulations && (
+					<header className="progress-panel" aria-label="Treasure progress">
+						<img className="progress-panel__compass" src={compassImage} alt="" />
+						<div className="progress-panel__meter" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progressValue}>
+							<span className="progress-panel__bar-shell">
+								<img className="progress-panel__bar" src={progressBarImage} alt="" />
+								<span className="progress-panel__fill-track" aria-hidden="true">
+									<span className="progress-panel__fill" style={{ width: `${progressValue}%` }} />
+								</span>
 							</span>
-						</span>
-						<img className={`progress-panel__chest${isChestOpen ? ' is-open' : ''}`} src={isChestOpen ? chestOpenImage : chestClosedImage} alt={isChestOpen ? 'Open treasure chest' : 'Closed treasure chest'} />
-					</div>
-				</header>
-
-				<div className="game-content">
-					<section className="board-shell" aria-label="Game board, 6 columns by 5 rows">
-						<div className={`slot-grid${isSpinning ? ' is-spinning' : ''}`}>
-							{Array.from({ length: COLUMN_COUNT }, (_, columnIndex) => {
-								const column = reelStrips?.[columnIndex] ?? getColumn(symbols, columnIndex);
-								const reelStyle = {
-									'--reel-delay': `${columnIndex * REEL_START_DELAY}ms`,
-									'--reel-duration': `${REEL_BASE_DURATION + columnIndex * REEL_DURATION_STEP}ms`,
-								} as CSSProperties;
-
-								return (
-									<div className="slot-reel" key={columnIndex}>
-										<div className={reelStrips ? 'slot-reel__strip' : 'slot-reel__symbols'} style={reelStyle}>
-											{column.map((symbol) => <Slot key={symbol.id} symbol={symbol} />)}
-										</div>
-									</div>
-								);
-							})}
+							<img className={`progress-panel__chest${isChestOpen ? ' is-open' : ''}`} src={isChestOpen ? chestOpenImage : chestClosedImage} alt={isChestOpen ? 'Open treasure chest' : 'Closed treasure chest'} />
 						</div>
-						<img className="board-frame" src={frameImage} alt="" />
-					</section>
+					</header>
+				)}
 
-					<div className="scarab-track" aria-label="Bonus scarabs">
-						{[0, 1, 2].map((position) => (
-							<div className={`scarab-track__slot${position < completedRounds ? ' is-complete' : ''}`} key={position}>
-								<img src={scarabImage} alt={`Scarab ${position + 1}`} />
+				<div className={`game-content${isCongratulations ? ' game-content--congratulations' : ''}`}>
+					{isCongratulations ? (
+						<section className="congratulations" aria-labelledby="congratulations-title">
+							<h1 id="congratulations-title">Congratulations!</h1>
+							<p>You have won bonuses</p>
+							<button className="congratulations__button" type="button" onClick={handleOfferContinue}>Claim Bonus</button>
+						</section>
+					) : (
+						<>
+							<section className="board-shell" aria-label="Game board, 6 columns by 5 rows">
+								<div className={`slot-grid${isSpinning ? ' is-spinning' : ''}`}>
+									{Array.from({ length: COLUMN_COUNT }, (_, columnIndex) => {
+										const column = reelStrips?.[columnIndex] ?? getColumn(symbols, columnIndex);
+										const reelStyle = {
+											'--reel-delay': `${columnIndex * REEL_START_DELAY}ms`,
+											'--reel-duration': `${REEL_BASE_DURATION + columnIndex * REEL_DURATION_STEP}ms`,
+										} as CSSProperties;
+
+										return (
+											<div className="slot-reel" key={columnIndex}>
+												<div className={reelStrips ? 'slot-reel__strip' : 'slot-reel__symbols'} style={reelStyle}>
+													{column.map((symbol) => <Slot key={symbol.id} symbol={symbol} />)}
+												</div>
+											</div>
+										);
+									})}
+								</div>
+								<img className="board-frame" src={frameImage} alt="" />
+							</section>
+
+							<div className="scarab-track" aria-label="Bonus scarabs">
+								{[0, 1, 2].map((position) => (
+									<div className={`scarab-track__slot${position < completedRounds ? ' is-complete' : ''}`} key={position}>
+										<img src={scarabImage} alt={`Scarab ${position + 1}`} />
+									</div>
+								))}
 							</div>
-						))}
-					</div>
+						</>
+					)}
 				</div>
 
-				<nav className="game-controls" aria-label="Game controls">
-					<GradientButton className="control-button control-button--menu" aria-label="Open menu" disabled={isSpinning || controlsLocked}>
-						<span className="menu-icon" aria-hidden="true"><img src={burger} alt="" /></span>
-					</GradientButton>
+				{!isCongratulations && (
+					<nav className="game-controls" aria-label="Game controls">
+						<GradientButton className="control-button control-button--menu" aria-label="Open menu" disabled={isSpinning || controlsLocked}>
+							<span className="menu-icon" aria-hidden="true"><img src={burger} alt="" /></span>
+						</GradientButton>
 
-					<GradientButton className={`control-button control-button--spin${isSpinning ? ' is-spinning' : ''}`} aria-label="Spin" disabled={isSpinning || controlsLocked} onClick={handleSpin}>
-						<span className="spin-button__arrow" aria-hidden="true"><img src={spinArrow} alt="" /></span>
-					</GradientButton>
+						<GradientButton className={`control-button control-button--spin${isSpinning ? ' is-spinning' : ''}`} aria-label="Spin" disabled={isSpinning || controlsLocked} onClick={handleSpin}>
+							<span className="spin-button__arrow" aria-hidden="true"><img src={spinArrow} alt="" /></span>
+						</GradientButton>
 
-					<GradientButton className={`control-button control-button--auto${autoEnabled ? ' is-active' : ''}`} aria-label="Auto spin" aria-pressed={autoEnabled} disabled={controlsLocked} onClick={handleAutoToggle}>
-						<span>Auto</span>
-					</GradientButton>
-				</nav>
+						<GradientButton className={`control-button control-button--auto${autoEnabled ? ' is-active' : ''}`} aria-label="Auto spin" aria-pressed={autoEnabled} disabled={controlsLocked} onClick={handleAutoToggle}>
+							<span>Auto</span>
+						</GradientButton>
+					</nav>
+				)}
 			</div>
-
-			{phase === 'offer' && <OfferModal onContinue={handleOfferContinue} />}
 		</main>
 	);
 }
