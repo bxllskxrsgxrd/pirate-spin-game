@@ -46,10 +46,6 @@ const AUTO_ROUND_DELAY = 650;
 const CONGRATULATIONS_DELAY = 700;
 const OFFER_URL: string | null = null;
 const LOADER_DURATION = 1500;
-const LOADER_STEPS = [
-	{ delay: 220, progress: 50 },
-	{ delay: 1280, progress: 100 },
-] as const;
 
 const initialSymbolNames: SymbolName[] = [
 	'gem-red', 'bird-blue', 'gem-green', 'gem-purple', 'bird-red', 'gem-blue',
@@ -173,13 +169,11 @@ function App() {
 	const winAudioRef = useRef<HTMLAudioElement | null>(null);
 
 	useEffect(() => {
-		const stepTimers = LOADER_STEPS.map(({ delay, progress }) => (
-			window.setTimeout(() => setLoadingProgress(progress), delay)
-		));
+		const progressFrame = window.requestAnimationFrame(() => setLoadingProgress(100));
 		const completionTimer = window.setTimeout(() => setIsLoading(false), LOADER_DURATION);
 
 		return () => {
-			stepTimers.forEach((timer) => window.clearTimeout(timer));
+			window.cancelAnimationFrame(progressFrame);
 			window.clearTimeout(completionTimer);
 		};
 	}, []);
